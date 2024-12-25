@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canlı Oyun Nəticələri</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Canlı Oyun Nəticələri</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Ev Sahibi</th>
+                <th>Qonaq</th>
+                <th>İlk Rəqəm</th>
+                <th>İkinci Rəqəm</th>
+            </tr>
+        </thead>
+        <tbody id="game-results">
+            <!-- Canlı nəticələr burada göstəriləcək -->
+        </tbody>
+    </table>
+
+    <script>
+        // API-dən oyun nəticələrini çəkmək üçün funksiya
+        async function fetchGameResults() {
+            const apiUrl = 'https://api.sportsradar.com/sports/football/live';  // API URL-i
+            const apiKey = 'YOUR_API_KEY'; // Öz API açarınızı daxil edin
+
+            try {
+                const response = await fetch(`${apiUrl}?api_key=${apiKey}`);
+                const data = await response.json();
+
+                const resultsTable = document.getElementById('game-results');
+                resultsTable.innerHTML = '';  // Cədvəlin əvvəlki məlumatlarını sil
+
+                // Oyunları göstər
+                data.games.forEach(game => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${game.home_team.name}</td>
+                        <td>${game.away_team.name}</td>
+                        <td>${game.home_team.score}</td>
+                        <td>${game.away_team.score}</td>
+                    `;
+                    resultsTable.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Xəta baş verdi:', error);
+            }
+        }
+
+        // Sayt yüklənəndə məlumatları çəkmək
+        fetchGameResults();
+
+        // Hər 30 saniyədə bir nəticələri yenilə
+        setInterval(fetchGameResults, 30000);
+    </script>
+
+</body>
+</html>
