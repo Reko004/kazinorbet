@@ -51,17 +51,22 @@
         // Oyun nəticələrini HTML-də göstəririk
         const resultsDiv = document.getElementById('game-results');
 
-        games.forEach(game => {
-            const gameElement = document.createElement('div');
-            gameElement.classList.add('game');
-            
-            // Oyun məlumatlarını əlavə edirik
-            gameElement.innerHTML = `
-                <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
-                <p>Score: ${game.homeScore} - ${game.awayScore}</p>
-            `;
-            resultsDiv.appendChild(gameElement);
-        });
+        // Oyunları dövr edirik və HTML-də göstəriş əlavə edirik
+        if (games.length === 0) {
+            resultsDiv.innerHTML = 'Oyun nəticələri yüklənə bilmədi.';
+        } else {
+            games.forEach(game => {
+                const gameElement = document.createElement('div');
+                gameElement.classList.add('game');
+                
+                // Oyun məlumatlarını əlavə edirik
+                gameElement.innerHTML = `
+                    <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
+                    <p>Score: ${game.homeScore} - ${game.awayScore}</p>
+                `;
+                resultsDiv.appendChild(gameElement);
+            });
+        }
     </script>
 </body>
 </html>
