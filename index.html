@@ -26,29 +26,42 @@
     </div>
 
     <script>
-        // API-dən oyun nəticələrini alırıq
-        fetch('https://api.example.com/games')  // Bu URL-i öz API URL ilə dəyişin
-            .then(response => response.json())
-            .then(data => {
-                const resultsDiv = document.getElementById('game-results');
-                
-                // Data-nı oyunlara ayırırıq
-                data.forEach(game => {
-                    const gameElement = document.createElement('div');
-                    gameElement.classList.add('game');
-                    
-                    // Oyun nəticələrini yazırıq
-                    gameElement.innerHTML = `
-                        <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
-                        <p>Score: ${game.homeScore} - ${game.awayScore}</p>
-                    `;
-                    resultsDiv.appendChild(gameElement);
-                });
-            })
-            .catch(error => {
-                console.error('API səhvi:', error);
-                document.getElementById('game-results').innerHTML = 'Oyun nəticələri yüklənə bilmədi.';
-            });
+        // Oyun nəticələrini sadə obyektlərdə saxlayırıq
+        const games = [
+            {
+                homeTeam: 'Team A',
+                awayTeam: 'Team B',
+                homeScore: 2,
+                awayScore: 1
+            },
+            {
+                homeTeam: 'Team C',
+                awayTeam: 'Team D',
+                homeScore: 0,
+                awayScore: 3
+            },
+            {
+                homeTeam: 'Team E',
+                awayTeam: 'Team F',
+                homeScore: 1,
+                awayScore: 1
+            }
+        ];
+
+        // Oyun nəticələrini HTML-də göstəririk
+        const resultsDiv = document.getElementById('game-results');
+
+        games.forEach(game => {
+            const gameElement = document.createElement('div');
+            gameElement.classList.add('game');
+            
+            // Oyun məlumatlarını əlavə edirik
+            gameElement.innerHTML = `
+                <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
+                <p>Score: ${game.homeScore} - ${game.awayScore}</p>
+            `;
+            resultsDiv.appendChild(gameElement);
+        });
     </script>
 </body>
 </html>
