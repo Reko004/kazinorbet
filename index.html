@@ -3,132 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Results</title>
+    <title>Topu Zıplat Oyunu</title>
     <style>
-        /* Saytın əsas fonu */
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
             margin: 0;
-            padding: 0;
+            overflow: hidden;
         }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-top: 50px;
-            font-size: 36px;
-        }
-
-        /* Oyun nəticələrini tərtib etmək üçün kart görünüşü */
-        .game {
-            margin: 20px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .game:hover {
-            transform: translateY(-5px);
-        }
-
-        .game h3 {
-            font-size: 24px;
-            color: #2980b9;
-            margin-bottom: 10px;
-        }
-
-        .game p {
-            font-size: 18px;
-            color: #7f8c8d;
-            margin: 0;
-        }
-
-        /* Xəta mesajını gözəl bir şəkildə göstərmək */
-        #game-results {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Saytın ümumi hizalanması */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Stil üçün butonlar və başlıq */
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 20px 0;
-            background-color: #2c3e50;
-            color: white;
-            font-size: 18px;
-            border-radius: 5px;
-            text-decoration: none;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background-color: #2980b9;
+        canvas {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Today's Game Results</h1>
-        <a href="#" class="btn">See More Games</a>
-
-        <div id="game-results">
-            <!-- Oyun nəticələri burada göstəriləcək -->
-        </div>
-    </div>
-
-    <script>
-        // Oyun nəticələrini sadə obyektlərdə saxlayırıq
-        const games = [
-            {
-                homeTeam: 'Team A',
-                awayTeam: 'Team B',
-                homeScore: 2,
-                awayScore: 1
-            },
-            {
-                homeTeam: 'Team C',
-                awayTeam: 'Team D',
-                homeScore: 0,
-                awayScore: 3
-            },
-            {
-                homeTeam: 'Team E',
-                awayTeam: 'Team F',
-                homeScore: 1,
-                awayScore: 1
-            }
-        ];
-
-        // Oyun nəticələrini HTML-də göstəririk
-        const resultsDiv = document.getElementById('game-results');
-
-        if (games.length === 0) {
-            resultsDiv.innerHTML = '<p style="color: red;">Oyun nəticələri yüklənə bilmədi.</p>';
-        } else {
-            games.forEach(game => {
-                const gameElement = document.createElement('div');
-                gameElement.classList.add('game');
-                
-                gameElement.innerHTML = `
-                    <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
-                    <p>Score: <strong>${game.homeScore} - ${game.awayScore}</strong></p>
-                `;
-                resultsDiv.appendChild(gameElement);
-            });
-        }
-    </script>
+    <canvas id="gameCanvas"></canvas>
+    <script src="game.js"></script>
 </body>
 </html>
