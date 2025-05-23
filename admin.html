@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      background: #1b1b1b;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 5px;
+    }
+    button {
+      padding: 5px 10px;
+      background: #4CAF50;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>İstifadəçi</th>
+        <th>Balans (AZN)</th>
+        <th>Yeni Balans</th>
+        <th>Yenilə</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    function getAllUsers() {
+      const users = [];
+      for (let key in localStorage) {
+        if (key.startsWith('balance_')) {
+          const username = key.replace('balance_', '');
+          const balance = localStorage.getItem(key);
+          users.push({ username, balance });
+        }
+      }
+      return users;
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector('#userTable tbody');
+      tbody.innerHTML = '';
+      const users = getAllUsers();
+
+      users.forEach(user => {
+        const tr = document.createElement('tr');
+
+        const tdUser = document.createElement('td');
+        tdUser.textContent = user.username;
+
+        const tdBalance = document.createElement('td');
+        tdBalance.textContent = user.balance;
+
+        const tdInput = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.value = user.balance;
+
+        const tdButton = document.createElement('td');
+        const button = document.createElement('button');
+        button.textContent = 'Yenilə';
+        button.onclick = () => {
+          const newBalance = parseInt(input.value);
+          if (!isNaN(newBalance)) {
+            localStorage.setItem(`balance_${user.username}`, newBalance);
+            renderTable();
+          }
+        };
+
+        tdInput.appendChild(input);
+        tdButton.appendChild(button);
+
+        tr.appendChild(tdUser);
+        tr.appendChild(tdBalance);
+        tr.appendChild(tdInput);
+        tr.appendChild(tdButton);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
