@@ -3,115 +3,216 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>4x4 Meyvə Slotu</title>
+<title>4x4 Pro Meyvə Slotu</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
   body {
-    background: linear-gradient(135deg, #ffafbd, #ffc3a0);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
     margin: 0;
-    user-select: none;
+    font-family: 'Montserrat', sans-serif;
+    color: #eee;
   }
   h1 {
-    color: #fff;
-    text-shadow: 0 0 10px #d32f2f;
     margin-bottom: 20px;
+    text-shadow: 0 0 10px #f39c12;
   }
   #slot {
     display: grid;
-    grid-template-columns: repeat(4, 80px);
-    grid-template-rows: repeat(4, 80px);
-    gap: 12px;
-    background: rgba(255,255,255,0.25);
-    padding: 20px;
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(4, 100px);
+    gap: 15px;
+    background: #1c2833;
+    padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 0 30px 5px #ff6f91;
+    box-shadow: 0 0 20px 5px #f39c12aa;
   }
   .cell {
-    background: #fff;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(255, 111, 145, 0.6);
+    background: linear-gradient(145deg, #3c4a57, #263238);
+    border-radius: 20px;
+    box-shadow: inset 5px 5px 10px #1b242c,
+                inset -5px -5px 10px #4d616e;
+    font-size: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 40px;
-    transition: transform 0.3s ease;
     cursor: default;
+    user-select: none;
+    transition: transform 0.3s ease;
   }
-  .cell:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 25px rgba(255, 111, 145, 0.9);
+  .cell.winning {
+    animation: glow 1s infinite alternate;
+  }
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 10px 4px #f39c12;
+      transform: scale(1.1);
+    }
+    to {
+      box-shadow: 0 0 25px 8px #f39c12;
+      transform: scale(1.2);
+    }
+  }
+  #controls {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
   }
   #spinBtn {
-    margin-top: 25px;
-    padding: 12px 40px;
+    padding: 15px 50px;
     font-size: 22px;
-    background: #ff4b6e;
-    color: #fff;
+    background: #f39c12;
     border: none;
     border-radius: 30px;
+    color: #1c2833;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 6px 15px rgba(255, 75, 110, 0.7);
+    box-shadow: 0 0 15px #f39c12cc;
     transition: background 0.3s ease;
   }
-  #spinBtn:hover {
-    background: #ff244f;
+  #spinBtn:disabled {
+    background: #a66e00;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  #balance {
+    font-size: 20px;
+  }
+  #bet {
+    width: 80px;
+    font-size: 18px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<h1>4x4 Meyvə Slotu</h1>
+<h1>4x4 Pro Meyvə Slotu</h1>
 <div id="slot"></div>
-<button id="spinBtn">Spin</button>
+
+<div id="controls">
+  <label for="bet">Mərc (₼):</label>
+  <input type="number" id="bet" min="1" max="100" value="10" />
+  <button id="spinBtn">Spin</button>
+  <div id="balance">Balans: 1000₼</div>
+</div>
 
 <script>
-  // Meyvələr emoji olaraq
   const fruits = ['🍎', '🍊', '🍋', '🍉', '🍇', '🍓', '🍒', '🥭'];
-
   const slot = document.getElementById('slot');
   const spinBtn = document.getElementById('spinBtn');
+  const balanceElem = document.getElementById('balance');
+  const betInput = document.getElementById('bet');
 
-  // 4x4 üçün 16 hüceyrə yaratmaq
+  let balance = 1000;
+  let spinning = false;
+
+  // 4x4 grid yarat
   for (let i = 0; i < 16; i++) {
     const cell = document.createElement('div');
     cell.classList.add('cell');
     slot.appendChild(cell);
   }
 
-  // Spin funksiyası - təsadüfi meyvə doldurur
-  function spin() {
-    const cells = document.querySelectorAll('.cell');
+  const cells = document.querySelectorAll('.cell');
+
+  // Spin funksiyası: təsadüfi simvollar verir
+  function spinGrid() {
     cells.forEach(cell => {
-      const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
-      cell.textContent = randomFruit;
+      const fruit = fruits[Math.floor(Math.random() * fruits.length)];
+      cell.textContent = fruit;
+      cell.classList.remove('winning');
     });
   }
 
-  // Başlanğıcda slotu doldur
-  spin();
+  // Qalib sətir və sütun yoxlama funksiyası
+  function checkWin() {
+    let winLines = [];
 
-  // Spin düyməsinə kliklənəndə yenidən qarışdır
+    // Sətir üzrə yoxlama
+    for (let r = 0; r < 4; r++) {
+      const row = [...cells].slice(r*4, r*4+4);
+      const first = row[0].textContent;
+      if (first !== '' && row.every(c => c.textContent === first)) {
+        winLines.push(row);
+      }
+    }
+
+    // Sütun üzrə yoxlama
+    for (let c = 0; c < 4; c++) {
+      let col = [];
+      for (let r = 0; r < 4; r++) {
+        col.push(cells[r*4 + c]);
+      }
+      const first = col[0].textContent;
+      if (first !== '' && col.every(cell => cell.textContent === first)) {
+        winLines.push(col);
+      }
+    }
+
+    return winLines;
+  }
+
+  // Qalib xətlərinə vizual effekt verir
+  function highlightWins(winLines) {
+    winLines.forEach(line => {
+      line.forEach(cell => cell.classList.add('winning'));
+    });
+  }
+
+  // Spin düyməsinə basanda spin başlasın
   spinBtn.addEventListener('click', () => {
-    spinBtn.disabled = true;
-    spinBtn.textContent = 'Spinning...';
+    const bet = Number(betInput.value);
+    if (bet <= 0 || bet > balance) {
+      alert('Zəhmət olmasa, balansınız daxilində düzgün mərc edin.');
+      return;
+    }
+    if (spinning) return;
 
-    // 1 saniyəlik animasiya tərzi
-    let count = 0;
-    const interval = setInterval(() => {
-      spin();
-      count++;
-      if (count >= 15) {
-        clearInterval(interval);
+    spinning = true;
+    spinBtn.disabled = true;
+
+    // Balansı azaldır
+    balance -= bet;
+    balanceElem.textContent = `Balans: ${balance}₼`;
+
+    // Spin animasiyası 1.2 saniyə
+    let spins = 0;
+    const spinInterval = setInterval(() => {
+      spinGrid();
+      spins++;
+      if (spins >= 15) {
+        clearInterval(spinInterval);
+
+        const wins = checkWin();
+        if (wins.length > 0) {
+          highlightWins(wins);
+          // Qalib gələn mərcin 5x-ini verir (sadə qayda)
+          let winAmount = bet * 5 * wins.length;
+          balance += winAmount;
+          alert(`Qalib oldunuz! ${winAmount}₼ qazandınız.`);
+        } else {
+          alert('Qalib olmadınız, yenidən cəhd edin!');
+        }
+
+        balanceElem.textContent = `Balans: ${balance}₼`;
         spinBtn.disabled = false;
-        spinBtn.textContent = 'Spin';
+        spinning = false;
       }
     }, 80);
   });
+
+  // Başlanğıcda doldur
+  spinGrid();
 </script>
 
 </body>
