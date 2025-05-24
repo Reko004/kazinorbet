@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Panel - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f0f0f0;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #0077cc;
+      margin-bottom: 30px;
+    }
+    form {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    input[type="text"], input[type="password"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      background: white;
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+    li span {
+      font-weight: bold;
+    }
+    li button {
+      background-color: #cc3300;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    li button:hover {
+      background-color: #aa0000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Panel</h1>
+
+  <div id="loginDiv">
+    <form id="loginForm">
+      <input type="text" id="loginUser" placeholder="İstifadəçi adı" required />
+      <input type="password" id="loginPass" placeholder="Şifrə" required />
+      <button type="submit">Daxil ol</button>
+    </form>
+  </div>
+
+  <div id="adminDiv" style="display:none;">
+    <form id="balanceForm">
+      <input type="text" id="user" placeholder="İstifadəçi adı" required />
+      <input type="number" id="balance" placeholder="Balans (AZN)" required min="0" step="0.01" />
+      <button type="submit">Əlavə et / Yenilə</button>
+    </form>
+
+    <ul id="balanceList"></ul>
+
+    <button id="logoutBtn" style="margin-top:20px; background:#cc0000;">Çıxış</button>
+  </div>
+
+  <script>
+    const adminUsername = "admin";  // dəyişə bilərsən
+    const adminPassword = "1234";   // dəyişə bilərsən
+
+    function loadBalances() {
+      const data = localStorage.getItem('balances');
+      return data ? JSON.parse(data) : {};
+    }
+    function saveBalances(balances) {
+      localStorage.setItem('balances', JSON.stringify(balances));
+    }
+    function renderBalances() {
+      const list = document.getElementById('balanceList');
+      const balances = loadBalances();
+      list.innerHTML = '';
+
+      if (Object.keys(balances).length === 0) {
+        list.innerHTML = '<li>Heç bir balans qeydiyyatda yoxdur.</li>';
+        return;
+      }
+      for (const user in balances) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${user}</span>: ${balances[user].toFixed(2)} AZN 
+          <button onclick="deleteBalance('${user}')">Sil</button>`;
+        list.appendChild(li);
+      }
+    }
+    function deleteBalance(user) {
+      const balances = loadBalances();
+      delete balances[user];
+      saveBalances(balances);
+      renderBalances();
+    }
+
+    function showAdminPanel() {
+      document.getElementById('loginDiv').style.display = 'none';
+      document.getElementById('adminDiv').style.display = 'block';
+      renderBalances();
+    }
+    function showLogin() {
+      document.getElementById('loginDiv').style.display = 'block';
+      document.getElementById('adminDiv').style.display = 'none';
+    }
+
+    // Login form submit
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+
+      if(user === adminUsername && pass === adminPassword) {
+        localStorage.setItem('isLoggedIn', 'true');
+        showAdminPanel();
+      } else {
+        alert('İstifadəçi adı və ya şifrə yanlışdır!');
+      }
+    });
+
+    // Logout button
+    document.getElementById('logoutBtn').addEventListener('click', function(){
+      localStorage.removeItem('isLoggedIn');
+      showLogin();
+    });
+
+    // Balans form submit
+    document.getElementById('balanceForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const user = document.getElementById('user').value.trim();
+      const balance = parseFloat(document.getElementById('balance').value);
+
+      if(user && !isNaN(balance) && balance >= 0) {
+        const balances = loadBalances();
+        balances[user] = balance;
+        saveBalances(balances);
+        renderBalances();
+        this.reset();
+      } else {
+        alert('Zəhmət olmasa, düzgün məlumat daxil edin.');
+      }
+    });
+
+    // Səhifə yüklənəndə login vəziyyətinə bax
+    window.onload = function() {
+      if(localStorage.getItem('isLoggedIn') === 'true') {
+        showAdminPanel();
+      } else {
+        showLogin();
+      }
+    };
+
+  </script>
+
+</body>
+</html>
