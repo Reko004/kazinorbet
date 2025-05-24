@@ -1,43 +1,43 @@
-// server.js
 const express = require('express');
-const path = require('path');
 const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Sadə "baza" kimi istifadəçi balansları:
-const userBalances = {};
+// Sadə yaddaşda user balansları (userId -> balance)
+const balances = {};
 
-// Yeni istifadəçi gələndə və ya balans soruşanda:
+// Yeni istifadəçi ID yaradılması
+function generateUserId() {
+  return 'user_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Balansı gətirir
 app.get('/balance/:userId', (req, res) => {
   const { userId } = req.params;
-  if (!userBalances[userId]) {
-    userBalances[userId] = 1000; // yeni istifadəçiyə başlanğıc balansı 1000₼
+  if (!balances[userId]) {
+    balances[userId] = 1000; // İlk balans
   }
-  res.json({ balance: userBalances[userId] });
+  res.json({ balance: balances[userId] });
 });
 
-// Mərc qoyanda balansı yenilə:
+// Oyun mərcini qəbul edir, balans yeniləyir
 app.post('/play/:userId', (req, res) => {
   const { userId } = req.params;
-  const { bet, winMultiplier } = req.body; // winMultiplier - qalibdirsə 5, yoxsa 0
+  const { bet, winMultiplier } = req.body;
 
-  if (!userBalances[userId]) {
-    userBalances[userId] = 1000;
-  }
-  if (bet > userBalances[userId]) {
-    return res.status(400).json({ error: 'Balansınız yetərli deyil' });
+  if (!balances[userId]) balances[userId] = 1000;
+
+  if (bet > balances[userId]) {
+    return res.status(400).json({ error: 'Balans kifayət etmir!' });
   }
 
-  // Balansı yenilə: mərc çıxılır, qalibdirsə qazanc artırılır
-  userBalances[userId] = userBalances[userId] - bet + (bet * winMultiplier);
-  res.json({ balance: userBalances[userId] });
+  balances[userId] = balances[userId] - bet + bet * winMultiplier;
+  res.json({ balance: balances[userId] });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server ${PORT} portunda işə düşdü`);
+  console.log(`Server ${PORT} portunda işləyir`);
 });
