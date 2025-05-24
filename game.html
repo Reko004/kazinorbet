@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4x4 Meyvə Slotu</title>
+<style>
+  body {
+    background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    user-select: none;
+  }
+  h1 {
+    color: #fff;
+    text-shadow: 0 0 10px #d32f2f;
+    margin-bottom: 20px;
+  }
+  #slot {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    grid-template-rows: repeat(4, 80px);
+    gap: 12px;
+    background: rgba(255,255,255,0.25);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px 5px #ff6f91;
+  }
+  .cell {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(255, 111, 145, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    transition: transform 0.3s ease;
+    cursor: default;
+  }
+  .cell:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(255, 111, 145, 0.9);
+  }
+  #spinBtn {
+    margin-top: 25px;
+    padding: 12px 40px;
+    font-size: 22px;
+    background: #ff4b6e;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255, 75, 110, 0.7);
+    transition: background 0.3s ease;
+  }
+  #spinBtn:hover {
+    background: #ff244f;
+  }
+</style>
+</head>
+<body>
+
+<h1>4x4 Meyvə Slotu</h1>
+<div id="slot"></div>
+<button id="spinBtn">Spin</button>
+
+<script>
+  // Meyvələr emoji olaraq
+  const fruits = ['🍎', '🍊', '🍋', '🍉', '🍇', '🍓', '🍒', '🥭'];
+
+  const slot = document.getElementById('slot');
+  const spinBtn = document.getElementById('spinBtn');
+
+  // 4x4 üçün 16 hüceyrə yaratmaq
+  for (let i = 0; i < 16; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    slot.appendChild(cell);
+  }
+
+  // Spin funksiyası - təsadüfi meyvə doldurur
+  function spin() {
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach(cell => {
+      const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
+      cell.textContent = randomFruit;
+    });
+  }
+
+  // Başlanğıcda slotu doldur
+  spin();
+
+  // Spin düyməsinə kliklənəndə yenidən qarışdır
+  spinBtn.addEventListener('click', () => {
+    spinBtn.disabled = true;
+    spinBtn.textContent = 'Spinning...';
+
+    // 1 saniyəlik animasiya tərzi
+    let count = 0;
+    const interval = setInterval(() => {
+      spin();
+      count++;
+      if (count >= 15) {
+        clearInterval(interval);
+        spinBtn.disabled = false;
+        spinBtn.textContent = 'Spin';
+      }
+    }, 80);
+  });
+</script>
+
+</body>
+</html>
