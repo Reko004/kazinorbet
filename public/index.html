@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4x4 Pro Meyvə Slotu - Node.js ilə</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+  body {
+    background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    color: #eee;
+    background-blend-mode: darken;
+    background-color: rgba(0,0,0,0.6);
+  }
+  h1 {
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #f39c12;
+  }
+  #slot {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(4, 100px);
+    gap: 15px;
+    background: rgba(28, 40, 51, 0.85);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px 5px #f39c12aa;
+  }
+  .cell {
+    background: linear-gradient(145deg, #3c4a57, #263238);
+    border-radius: 20px;
+    box-shadow: inset 5px 5px 10px #1b242c,
+                inset -5px -5px 10px #4d616e;
+    font-size: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+  .cell.winning {
+    animation: glow 1s infinite alternate;
+  }
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 10px 4px #f39c12;
+      transform: scale(1.1);
+    }
+    to {
+      box-shadow: 0 0 25px 8px #f39c12;
+      transform: scale(1.2);
+    }
+  }
+  #controls {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  #spinBtn {
+    padding: 15px 50px;
+    font-size: 22px;
+    background: #f39c12;
+    border: none;
+    border-radius: 30px;
+    color: #1c2833;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 15px #f39c12cc;
+    transition: background 0.3s ease;
+  }
+  #spinBtn:disabled {
+    background: #a66e00;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  #balance {
+    font-size: 20px;
+  }
+  #bet {
+    width: 80px;
+    font-size: 18px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>4x4 Pro Meyvə Slotu</h1>
+<div id="slot"></div>
+
+<div id="controls">
+  <label for="bet">Mərc (₼):</label>
+  <input type="number" id="bet" min="1" max="100" value="10" />
+  <button id="spinBtn">Spin</button>
+  <div id="balance">Balans: ...₼</div>
+</div>
+
+<script>
+  const fruits = ['🍎', '🍊', '🍋', '🍉', '🍇', '🍓', '🍒', '🥭'];
+  const slot = document.getElementById('slot');
+  const spinBtn = document.getElementById('spinBtn');
+  const balanceElem = document.getElementById('balance');
+  const betInput = document.getElementById('bet');
+
+  // İstifadəçi ID-si (sadə demo üçün browserdə localStorage-dan alırıq, yoxdursa yaradırıq)
+  let userId = localStorage.getItem('userId');
+  if (!userId) {
+    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('userId', userId);
+  }
+
+  let balance = 0;
+  let spinning = false;
+
+  // 4x4 grid yarat
+  for (let i = 0; i < 16; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    slot.appendChild(cell);
+  }
+  const cells = document.querySelectorAll('.cell');
+
+  function spinGrid() {
+    cells.forEach(cell => {
+      const fruit = fruits[Math.floor(Math.random() * fruits.length)];
+      cell.textContent = fruit;
+      cell.classList.remove('winning');
+    });
+  }
+
+  function checkWin() {
+    let winLines = [];
+
+    // Sətir üzrə yoxlama
+    for (let r = 0; r < 4; r++) {
+      const row = [...cells].slice(r*4, r*4+4);
+      const first = row[0].textContent;
+      if (first !== '' && row.every(c => c.textContent === first)) {
+        winLines.push(row);
+      }
+    }
+
+    // Sütun üzrə yoxlama
+    for (let c = 0; c < 4; c++) {
+      let col = [];
+      for (let r = 0; r < 4; r++) {
+        col.push(cells[r*4 + c]);
+      }
+      const first = col[0].textContent;
+      if (first !== '' && col.every(cell => cell.textContent === first)) {
+        winLines.push(col);
+      }
+    }
+
+    return winLines;
+  }
+
+  function highlightWins(winLines) {
+    winLines.forEach(line => {
+      line.forEach(cell => cell.classList.add('winning'));
+    });
+  }
+
+  function updateBalanceDisplay() {
+    balanceElem.textContent = `Balans: ${balance}₼`;
+  }
+
+  // Serverdən balansı götürək
+  async function fetchBalance() {
+    const res = await fetch(`http://localhost:3000/balance/${userId}`);
+    if (res.ok) {
+      const data = await res.json();
+      balance = data.balance;
+      updateBalanceDisplay();
+    } else {
+      alert('Balansı almaq mümkün olmadı.');
+    }
+  }
+
+  spinBtn.addEventListener('click', async () => {
+    const bet = Number(betInput.value);
+    if (bet <= 0 || bet > balance) {
+      alert('Zəhmət olmasa, balansınız daxilində düzgün mərc edin.');
+      return;
+    }
+    if (spinning) return;
+
+    spinning = true;
+    spinBtn.disabled = true;
+
+    let spins = 0;
+    const spinInterval = setInterval(() => {
+      spinGrid();
+      spins++;
+      if (spins >= 15) {
+        clearInterval(spinInterval);
+
+        const wins = checkWin();
+        if (wins.length > 0) {
+          highlightWins(wins);
+
+          // Qazanc multiplikatoru: 5x qalib, yoxsa 0
+          const winMultiplier = 5;
+
+          // Serverə balansı yenilə
+          fetch(`http://localhost:3000/play/${userId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ bet, winMultiplier })
+          })
+          .then(res => res.json())
+          .then(data => {
+            balance = data.balance;
+            updateBalanceDisplay();
+            alert('Qalib oldunuz!');
+          })
+          .catch(() => {
+            alert('Server ilə əlaqə xətası.');
+          });
+
+        } else {
+          // Uduzduqda multiplikator 0
+          fetch(`http://localhost:3000/play/${userId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ bet, winMultiplier: 0 })
+          })
+          .then(res => res.json())
+          .then(data => {
+            balance = data.balance;
+            updateBalanceDisplay();
+            alert('Qalib olmadınız, yenidən cəhd edin!');
+          })
+          .catch(() => {
+            alert('Server ilə əlaqə xətası.');
+          });
+        }
+
+        spinBtn.disabled = false;
+        spinning = false;
+      }
+    }, 80);
+  });
+
+  fetchBalance();  // Sayt yüklənəndə balansı serverdən alırıq
+</script>
+
+</body>
+</html>
