@@ -1,177 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIP Fruit Slot Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIP Login</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at center, #ff0080, #5e00ff);
-      color: #fff;
+      background: radial-gradient(circle, #140033, #000);
+      font-family: 'Orbitron', sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
+      color: #fff;
       overflow: hidden;
     }
-    .login {
-      background: rgba(255, 255, 255, 0.1);
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
       border-radius: 20px;
-      padding: 30px;
+      box-shadow: 0 0 20px #ff00cc, 0 0 40px #ff00cc inset;
+      width: 300px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 0 20px #fff4;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
-    .login input {
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
-    .login button {
-      padding: 10px;
-      border-radius: 10px;
-      background: gold;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .hidden {
-      display: none;
-    }
-    .game {
+    h2 {
       text-align: center;
+      color: #ff00cc;
+      margin-bottom: 1rem;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 60px);
-      grid-template-rows: repeat(4, 60px);
-      gap: 10px;
-      margin: 20px 0;
-    }
-    .cell {
-      font-size: 2em;
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      transition: transform 0.4s ease;
-    }
-    .highlight {
-      background: gold;
-      color: black;
-      font-weight: bold;
-    }
-    .spin-btn {
-      padding: 10px 20px;
+    input {
+      width: 100%;
+      padding: 0.7rem;
+      margin: 0.5rem 0;
       border: none;
-      background: lime;
-      color: black;
-      font-weight: bold;
-      font-size: 1.1em;
-      border-radius: 15px;
-      cursor: pointer;
-      transition: 0.3s;
+      border-radius: 10px;
+      background: #fff;
+      font-family: 'Orbitron', sans-serif;
     }
-    .spin-btn:hover {
-      transform: scale(1.05);
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #ff00cc, #3333ff);
+      color: white;
+      font-weight: bold;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+    .toggle {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #ff00cc;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2 id="formTitle">Login</h2>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="handleAction()">Login</button>
+    <div class="toggle" onclick="toggleMode()">Don't have an account? Register</div>
+  </div>
 
-<div class="login" id="login-box">
-  <h2>Login</h2>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Enter</button>
-</div>
+  <script>
+    let mode = 'login';
+    const users = JSON.parse(localStorage.getItem('users')) || {};
 
-<div class="game hidden" id="game-box">
-  <h2>🎰 VIP Fruit Slot 🎰</h2>
-  <div class="grid" id="grid"></div>
-  <button class="spin-btn" onclick="spin()">Spin (10 AZN)</button>
-  <p id="result"></p>
-</div>
+    function handleAction() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-<script>
-  const fruits = ["🍒", "🍋", "🍇", "🍉", "🍊", "🍎", "🍓", "🥝"];
-  const gridEl = document.getElementById('grid');
-
-  let isSpinning = false;
-
-  function login() {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    if (u === "admin" && p === "1234") {
-      document.getElementById('login-box').classList.add('hidden');
-      document.getElementById('game-box').classList.remove('hidden');
-      generateGrid();
-    } else {
-      alert("Invalid credentials");
-    }
-  }
-
-  function generateGrid(highlights = []) {
-    gridEl.innerHTML = '';
-    for (let i = 0; i < 16; i++) {
-      const cell = document.createElement('div');
-      const fruit = fruits[Math.floor(Math.random() * fruits.length)];
-      cell.className = 'cell';
-      cell.textContent = fruit;
-      if (highlights.includes(i)) cell.classList.add('highlight');
-      gridEl.appendChild(cell);
-    }
-  }
-
-  function spin() {
-    if (isSpinning) return;
-    isSpinning = true;
-    let spins = 10;
-    let interval = setInterval(() => {
-      generateGrid();
-      spins--;
-      if (spins <= 0) {
-        clearInterval(interval);
-        checkWin();
-        isSpinning = false;
-      }
-    }, 100);
-  }
-
-  function checkWin() {
-    const cells = [...document.querySelectorAll('.cell')];
-    const symbols = cells.map(c => c.textContent);
-    const winningIndices = [];
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 2; c++) {
-        const i = r * 4 + c;
-        if (symbols[i] === symbols[i+1] && symbols[i] === symbols[i+2] && symbols[i] === symbols[i+3]) {
-          winningIndices.push(i, i+1, i+2, i+3);
+      if (mode === 'login') {
+        if (users[username] && users[username] === password) {
+          alert('Login successful!');
+          localStorage.setItem('currentUser', username);
+          window.location.href = 'game.html';
+        } else {
+          alert('Invalid credentials');
+        }
+      } else {
+        if (users[username]) {
+          alert('Username already exists');
+        } else {
+          users[username] = password;
+          localStorage.setItem('users', JSON.stringify(users));
+          alert('Registered successfully. Now login.');
+          toggleMode();
         }
       }
     }
-    for (let c = 0; c < 4; c++) {
-      for (let r = 0; r < 2; r++) {
-        const i = r * 4 + c;
-        if (symbols[i] === symbols[i+4] && symbols[i] === symbols[i+8] && symbols[i] === symbols[i+12]) {
-          winningIndices.push(i, i+4, i+8, i+12);
-        }
-      }
-    }
-    generateGrid(winningIndices);
-    document.getElementById('result').textContent = winningIndices.length > 0 ? '🎉 You win 50 AZN! 🎉' : 'Try again!';
-  }
-</script>
 
+    function toggleMode() {
+      mode = mode === 'login' ? 'register' : 'login';
+      document.getElementById('formTitle').textContent = mode === 'login' ? 'Login' : 'Register';
+      document.querySelector('button').textContent = mode === 'login' ? 'Login' : 'Register';
+      document.querySelector('.toggle').textContent = mode === 'login'
+        ? "Don't have an account? Register"
+        : "Already have an account? Login";
+    }
+  </script>
 </body>
 </html>
