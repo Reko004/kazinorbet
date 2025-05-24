@@ -1,140 +1,177 @@
 <!DOCTYPE html>
-<html lang="az">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meyvə Slot Oyunu</title>
+  <title>VIP Fruit Slot Game</title>
   <style>
     body {
-      background: #1b1b1b;
-      font-family: sans-serif;
-      color: #fff;
-      text-align: center;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #ff0080, #5e00ff);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
     }
-    h1 { margin-top: 10px; }
-    #balance { font-size: 18px; margin: 10px 0; }
-    #betInput {
-      padding: 8px;
-      font-size: 16px;
-      width: 100px;
+    .login {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px #fff4;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .login input {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+    .login button {
+      padding: 10px;
+      border-radius: 10px;
+      background: gold;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+    .game {
       text-align: center;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    #grid {
+    .grid {
       display: grid;
       grid-template-columns: repeat(4, 60px);
+      grid-template-rows: repeat(4, 60px);
       gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
+      margin: 20px 0;
     }
     .cell {
+      font-size: 2em;
       width: 60px;
       height: 60px;
-      font-size: 30px;
-      background: #333;
       display: flex;
-      justify-content: center;
       align-items: center;
-      border-radius: 8px;
-      transition: transform 0.2s;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      transition: transform 0.4s ease;
     }
-    .spin {
-      animation: spin 0.4s ease-in-out;
-    }
-    @keyframes spin {
-      0% { transform: rotateY(0); }
-      50% { transform: rotateY(180deg); }
-      100% { transform: rotateY(0); }
-    }
-    #message {
-      margin-top: 15px;
+    .highlight {
+      background: gold;
+      color: black;
       font-weight: bold;
+    }
+    .spin-btn {
+      padding: 10px 20px;
+      border: none;
+      background: lime;
+      color: black;
+      font-weight: bold;
+      font-size: 1.1em;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .spin-btn:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
-  <h1>Meyvə Slot Oyunu</h1>
-  <div id="balance"></div>
-  <input type="number" id="betInput" placeholder="Mərc" min="1">
-  <br>
-  <button onclick="spin()">Fırlat</button>
-  <div id="grid"></div>
-  <div id="message"></div>
 
-  <script>
-    const fruits = ['🍒', '🍋', '🍉', '🍇', '🍎', '🥝'];
-    const grid = document.getElementById('grid');
-    const balanceEl = document.getElementById('balance');
-    const messageEl = document.getElementById('message');
-    const username = localStorage.getItem('username');
-    let balance = parseInt(localStorage.getItem(`balance_${username}`)) || 0;
+<div class="login" id="login-box">
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Enter</button>
+</div>
 
-    function updateBalance() {
-      balanceEl.textContent = `Balans: ${balance} AZN`;
+<div class="game hidden" id="game-box">
+  <h2>🎰 VIP Fruit Slot 🎰</h2>
+  <div class="grid" id="grid"></div>
+  <button class="spin-btn" onclick="spin()">Spin (10 AZN)</button>
+  <p id="result"></p>
+</div>
+
+<script>
+  const fruits = ["🍒", "🍋", "🍇", "🍉", "🍊", "🍎", "🍓", "🥝"];
+  const gridEl = document.getElementById('grid');
+
+  let isSpinning = false;
+
+  function login() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    if (u === "admin" && p === "1234") {
+      document.getElementById('login-box').classList.add('hidden');
+      document.getElementById('game-box').classList.remove('hidden');
+      generateGrid();
+    } else {
+      alert("Invalid credentials");
     }
+  }
 
-    function createGrid() {
-      grid.innerHTML = '';
-      for (let i = 0; i < 16; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        grid.appendChild(cell);
+  function generateGrid(highlights = []) {
+    gridEl.innerHTML = '';
+    for (let i = 0; i < 16; i++) {
+      const cell = document.createElement('div');
+      const fruit = fruits[Math.floor(Math.random() * fruits.length)];
+      cell.className = 'cell';
+      cell.textContent = fruit;
+      if (highlights.includes(i)) cell.classList.add('highlight');
+      gridEl.appendChild(cell);
+    }
+  }
+
+  function spin() {
+    if (isSpinning) return;
+    isSpinning = true;
+    let spins = 10;
+    let interval = setInterval(() => {
+      generateGrid();
+      spins--;
+      if (spins <= 0) {
+        clearInterval(interval);
+        checkWin();
+        isSpinning = false;
+      }
+    }, 100);
+  }
+
+  function checkWin() {
+    const cells = [...document.querySelectorAll('.cell')];
+    const symbols = cells.map(c => c.textContent);
+    const winningIndices = [];
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 2; c++) {
+        const i = r * 4 + c;
+        if (symbols[i] === symbols[i+1] && symbols[i] === symbols[i+2] && symbols[i] === symbols[i+3]) {
+          winningIndices.push(i, i+1, i+2, i+3);
+        }
       }
     }
-
-    function spin() {
-      const bet = parseInt(document.getElementById('betInput').value);
-      if (!bet || bet <= 0) {
-        messageEl.textContent = 'Zəhmət olmasa düzgün mərc daxil edin';
-        return;
+    for (let c = 0; c < 4; c++) {
+      for (let r = 0; r < 2; r++) {
+        const i = r * 4 + c;
+        if (symbols[i] === symbols[i+4] && symbols[i] === symbols[i+8] && symbols[i] === symbols[i+12]) {
+          winningIndices.push(i, i+4, i+8, i+12);
+        }
       }
-      if (balance < bet) {
-        messageEl.textContent = 'Balansda kifayət qədər vəsait yoxdur';
-        return;
-      }
-
-      balance -= bet;
-      updateBalance();
-      messageEl.textContent = '';
-
-      const cells = document.querySelectorAll('.cell');
-      let allEqual = true;
-      let firstValue = null;
-
-      for (let i = 0; i < cells.length; i++) {
-        const fruit = fruits[Math.floor(Math.random() * fruits.length)];
-        cells[i].textContent = fruit;
-        cells[i].classList.add('spin');
-        setTimeout(() => cells[i].classList.remove('spin'), 400);
-
-        if (i === 0) firstValue = fruit;
-        else if (fruit !== firstValue) allEqual = false;
-      }
-
-      if (allEqual) {
-        const winAmount = bet * 10;
-        balance += winAmount;
-        messageEl.textContent = `Qazandın! +${winAmount} AZN`;
-      } else {
-        messageEl.textContent = 'Uduzdun. Yenidən sına!';
-      }
-
-      localStorage.setItem(`balance_${username}`, balance);
     }
+    generateGrid(winningIndices);
+    document.getElementById('result').textContent = winningIndices.length > 0 ? '🎉 You win 50 AZN! 🎉' : 'Try again!';
+  }
+</script>
 
-    createGrid();
-    updateBalance();
-  </script>
 </body>
 </html>
